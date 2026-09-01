@@ -1,0 +1,39 @@
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+@theme {
+  --color-primary: #581c87; /* Dark purple */
+  --color-primary-light: #f3e8ff;
+  --color-primary-dark: #3b0764;
+  --color-meninas: #ec4899; /* Pink */
+  --color-meninas-bg: #fdf2f8;
+  --color-mocas: #a855f7; /* Purple */
+  --color-mocas-bg: #faf5ff;
+  --color-meninos: #3b82f6; /* Blue */
+  --color-meninos-bg: #eff6ff;
+  --color-mocos: #10b981; /* Emerald/Green (as in screenshot) */
+  --color-mocos-bg: #ecfdf5;
+  --color-success: #16a34a;
+  --color-success-bg: #dcfce7;
+  --color-warning: #ca8a04;
+  --color-warning-bg: #fef9c3;
+  --color-danger: #dc2626;
+  --color-danger-bg: #fee2e2;
+  --color-background: #fafafa;
+  --font-sans: 'Nunito', 'Inter', system-ui, sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-gray-800 font-sans antialiased;
+  }
+}
+
+@layer utilities {
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
