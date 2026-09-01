@@ -92,7 +92,7 @@ export const DashboardPage: React.FC = () => {
   const numMocas = pessoasDaComunidade.filter(p => p.categoria === 'moca').length;
   const numMeninos = pessoasDaComunidade.filter(p => p.categoria === 'menino').length;
   const numMocos = pessoasDaComunidade.filter(p => p.categoria === 'moco').length;
-  const totalGeral = pessoasDaComunidade.length;
+  const totalGeral = numMeninas + numMocas + numMeninos + numMocos;
 
   const getRoleLabel = (perfil?: string) => {
     switch (perfil) {
