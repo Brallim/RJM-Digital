@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Users, Map, List, Plus, Activity, MapPin } from 'lucide-react';
+import { Users, Map, List, Plus, Activity, Check } from 'lucide-react';
 import { MapVisualizer } from '../components/irmandade/MapVisualizer';
 import { FamiliaListView } from '../components/irmandade/FamiliaListView';
 import type { Familia } from '../types';
@@ -11,14 +11,17 @@ import { familiaService } from '../services/familiaService';
 import { visitaService } from '../services/visitaService';
 
 export const IrmandadePage: React.FC = () => {
-  const { comunidadeAtiva, comunidades, setComunidadeAtiva, familias, pessoas } = useAppContext();
+  const { comunidadeAtiva, comunidades, familias, pessoas } = useAppContext();
+  const [selectedComunidadesIds, setSelectedComunidadesIds] = useState<string[]>(
+    comunidadeAtiva ? [comunidadeAtiva.id] : []
+  );
   const [viewMode, setViewMode] = useState<'map' | 'list'>('map');
   const [selectedFamilia, setSelectedFamilia] = useState<Familia | null>(null);
   const [showFamiliaForm, setShowFamiliaForm] = useState(false);
   const [familiaVisitaModal, setFamiliaVisitaModal] = useState<Familia | null>(null);
 
-  const familiasDaComunidade = familias.filter(f => f.comunidadeId === comunidadeAtiva?.id);
-  const moradoresDaComunidade = pessoas.filter(p => p.comunidadeId === comunidadeAtiva?.id);
+  const familiasDaComunidade = familias.filter(f => selectedComunidadesIds.includes(f.comunidadeId));
+  const moradoresDaComunidade = pessoas.filter(p => selectedComunidadesIds.includes(p.comunidadeId));
 
   // Derive stats
   const visitasPrioridade = familiasDaComunidade.filter(f => f.statusVisita === 'vermelho').length;
@@ -37,29 +40,35 @@ export const IrmandadePage: React.FC = () => {
       <header className="mb-5 text-center pt-2 flex flex-col items-center">
         <h1 className="text-xl font-bold text-[#1e1b4b] tracking-wide uppercase mb-2">Irmandade</h1>
         
-        <div className="relative inline-block">
-          <div className="flex items-center text-[#8b5cf6] text-sm font-semibold bg-purple-50 px-3 py-1.5 rounded-full border border-purple-100">
-            <MapPin size={14} className="mr-1.5 shrink-0" />
-            <select 
-              className="bg-transparent appearance-none outline-none font-bold text-[#8b5cf6] pr-4 cursor-pointer"
-              value={comunidadeAtiva?.id || ''}
-              onChange={(e) => {
-                const selected = comunidades.find(c => c.id === e.target.value);
-                if (selected) setComunidadeAtiva(selected);
-              }}
-            >
-              {comunidades.map(comunidade => (
-                <option key={comunidade.id} value={comunidade.id}>
-                  {comunidade.nome}
-                </option>
-              ))}
-            </select>
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-              <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M1 1L5 5L9 1" stroke="#8b5cf6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-          </div>
+        <div className="flex flex-wrap justify-center gap-3 mt-1">
+          {comunidades.map(comunidade => {
+            const isChecked = selectedComunidadesIds.includes(comunidade.id);
+            return (
+              <label 
+                key={comunidade.id} 
+                className={`flex items-center space-x-2 px-3 py-1.5 rounded-full border cursor-pointer transition-colors shadow-sm ${isChecked ? 'bg-purple-50 border-purple-200' : 'bg-white border-gray-200 hover:bg-gray-50'}`}
+              >
+                <div className="relative flex items-center">
+                  <input 
+                    type="checkbox" 
+                    className="sr-only"
+                    checked={isChecked}
+                    onChange={() => {
+                      setSelectedComunidadesIds(prev => 
+                        prev.includes(comunidade.id) 
+                          ? prev.filter(id => id !== comunidade.id)
+                          : [...prev, comunidade.id]
+                      );
+                    }}
+                  />
+                  <div className={`w-4 h-4 rounded-[4px] border flex items-center justify-center transition-colors ${isChecked ? 'bg-[#8b5cf6] border-[#8b5cf6]' : 'border-gray-300'}`}>
+                    {isChecked && <Check size={12} className="text-white" />}
+                  </div>
+                </div>
+                <span className={`font-bold text-[13px] select-none ${isChecked ? 'text-[#8b5cf6]' : 'text-gray-500'}`}>{comunidade.nome}</span>
+              </label>
+            )
+          })}
         </div>
       </header>
 
