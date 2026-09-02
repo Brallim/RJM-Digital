@@ -71,24 +71,35 @@ export const PessoaFormModal: React.FC<PessoaFormModalProps> = ({ onClose, onSav
     }
   };
 
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
   const handleDelete = async () => {
     if (!initialData?.id) return;
     
-    if (confirm(`Tem certeza que deseja excluir ${initialData.nomeCompleto}? Esta ação não pode ser desfeita.`)) {
-      setDeleting(true);
-      try {
-        await pessoaService.delete(initialData.id);
-        if (onDelete) {
-          onDelete();
-        } else {
-          onClose();
-        }
-      } catch (error) {
-        console.error('Erro ao deletar morador:', error);
-        alert('Erro ao excluir morador. Tente novamente.');
-      } finally {
-        setDeleting(false);
+    // Primeiro clique: mostra confirmação
+    if (!confirmDelete) {
+      setConfirmDelete(true);
+      return;
+    }
+
+    // Segundo clique: executa a exclusão
+    setDeleting(true);
+    try {
+      await pessoaService.delete(initialData.id);
+      alert('Morador excluído com sucesso!');
+      if (onDelete) {
+        onDelete();
+      } else {
+        onClose();
       }
+      // Recarrega os dados do app
+      window.location.reload();
+    } catch (error) {
+      console.error('Erro ao deletar morador:', error);
+      alert('Erro ao excluir morador: ' + (error instanceof Error ? error.message : 'Tente novamente.'));
+      setConfirmDelete(false);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -279,35 +290,68 @@ export const PessoaFormModal: React.FC<PessoaFormModalProps> = ({ onClose, onSav
         </div>
 
         {/* Footer actions */}
-        <div className="bg-white p-4 border-t border-gray-100 shrink-0 flex space-x-3">
-          {initialData?.id && (
-            <button 
-              type="button"
-              onClick={handleDelete}
-              disabled={saving || deleting}
-              className="px-4 bg-red-50 text-red-500 rounded-2xl font-bold flex items-center justify-center shadow-sm active:scale-[0.98] transition-transform disabled:opacity-60 disabled:cursor-not-allowed"
-              title="Excluir Morador"
-            >
-              {deleting ? <Loader2 size={20} className="animate-spin" /> : <Trash2 size={20} />}
-            </button>
+        <div className="bg-white p-4 border-t border-gray-100 shrink-0 space-y-3">
+          {confirmDelete && initialData?.id && (
+            <div className="bg-red-50 border border-red-200 rounded-2xl p-3 text-center">
+              <p className="text-red-600 text-sm font-bold mb-2">
+                Excluir {initialData.nomeCompleto}?
+              </p>
+              <p className="text-red-400 text-[11px] mb-3">Esta ação não pode ser desfeita.</p>
+              <div className="flex space-x-2">
+                <button
+                  type="button"
+                  onClick={() => setConfirmDelete(false)}
+                  disabled={deleting}
+                  className="flex-1 bg-gray-200 text-gray-700 rounded-xl py-2.5 font-bold text-sm active:scale-[0.98] transition-transform"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="flex-1 bg-red-500 text-white rounded-xl py-2.5 font-bold text-sm flex items-center justify-center active:scale-[0.98] transition-transform disabled:opacity-60"
+                >
+                  {deleting ? (
+                    <><Loader2 size={16} className="mr-1 animate-spin" /> Excluindo...</>
+                  ) : (
+                    <><Trash2 size={16} className="mr-1" /> Sim, excluir</>
+                  )}
+                </button>
+              </div>
+            </div>
           )}
           
-          <button 
-            type="button"
-            onClick={handleSalvar}
-            disabled={saving || deleting}
-            className="flex-1 bg-[#8b5cf6] text-white rounded-2xl py-3.5 font-bold flex items-center justify-center shadow-md active:scale-[0.98] transition-transform disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {saving ? (
-              <>
-                <Loader2 size={18} className="mr-2 animate-spin" /> Salvando...
-              </>
-            ) : (
-              <>
-                <Save size={18} className="mr-2" /> Salvar Morador
-              </>
+          <div className="flex space-x-3">
+            {initialData?.id && !confirmDelete && (
+              <button 
+                type="button"
+                onClick={handleDelete}
+                disabled={saving || deleting}
+                className="px-4 bg-red-50 text-red-500 rounded-2xl font-bold flex items-center justify-center shadow-sm active:scale-[0.98] transition-transform disabled:opacity-60 disabled:cursor-not-allowed"
+                title="Excluir Morador"
+              >
+                <Trash2 size={20} />
+              </button>
             )}
-          </button>
+            
+            <button 
+              type="button"
+              onClick={handleSalvar}
+              disabled={saving || deleting || confirmDelete}
+              className="flex-1 bg-[#8b5cf6] text-white rounded-2xl py-3.5 font-bold flex items-center justify-center shadow-md active:scale-[0.98] transition-transform disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {saving ? (
+                <>
+                  <Loader2 size={18} className="mr-2 animate-spin" /> Salvando...
+                </>
+              ) : (
+                <>
+                  <Save size={18} className="mr-2" /> Salvar Morador
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>
