@@ -98,6 +98,10 @@ export const pessoaService = {
    * Deleta uma pessoa existente pelo ID
    */
   async delete(id: string): Promise<void> {
+    // 1. Excluir possíveis frequências ligadas a este morador (cascade manual)
+    await supabase.from('frequencias').delete().eq('pessoaId', id);
+
+    // 2. Excluir o morador
     const { error } = await supabase
       .from(TABLE_NAME)
       .delete()
