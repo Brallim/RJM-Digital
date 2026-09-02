@@ -92,5 +92,20 @@ export const pessoaService = {
       console.error('Erro ao atualizar pessoa no Supabase:', error);
       throw error;
     }
+  },
+
+  /**
+   * Deleta uma pessoa existente pelo ID
+   */
+  async delete(id: string): Promise<void> {
+    const { error } = await supabase
+      .from(TABLE_NAME)
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Erro ao deletar pessoa no Supabase:', error);
+      throw error;
+    }
   }
 };

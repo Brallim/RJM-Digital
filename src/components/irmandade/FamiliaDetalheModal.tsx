@@ -190,6 +190,11 @@ export const FamiliaDetalheModal: React.FC<FamiliaDetalheModalProps> = ({ famili
                setPessoaParaVerPerfil(pessoa as Pessoa);
             }
           }}
+          onDelete={() => {
+            setShowPessoaForm(false);
+            setPessoaParaEditar(undefined);
+            setPessoaParaVerPerfil(undefined);
+          }}
         />
       )}
 
