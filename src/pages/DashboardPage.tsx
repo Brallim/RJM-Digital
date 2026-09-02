@@ -84,14 +84,11 @@ export const DashboardPage: React.FC = () => {
 
   const diasRestantes = calculateDaysLeft(reuniaoAtual?.data);
 
-  // Filtrar pessoas da comunidade atual
-  const pessoasDaComunidade = pessoas.filter(p => p.comunidadeId === comunidadeAtiva?.id);
-
-  // Calcular estatísticas
-  const numMeninas = pessoasDaComunidade.filter(p => p.categoria === 'menina').length;
-  const numMocas = pessoasDaComunidade.filter(p => p.categoria === 'moca').length;
-  const numMeninos = pessoasDaComunidade.filter(p => p.categoria === 'menino').length;
-  const numMocos = pessoasDaComunidade.filter(p => p.categoria === 'moco').length;
+  // Calcular estatísticas (total de todas as comuns)
+  const numMeninas = pessoas.filter(p => p.categoria === 'menina' && p.ativo).length;
+  const numMocas = pessoas.filter(p => p.categoria === 'moca' && p.ativo).length;
+  const numMeninos = pessoas.filter(p => p.categoria === 'menino' && p.ativo).length;
+  const numMocos = pessoas.filter(p => p.categoria === 'moco' && p.ativo).length;
   const totalGeral = numMeninas + numMocas + numMeninos + numMocos;
 
   const getRoleLabel = (perfil?: string) => {
