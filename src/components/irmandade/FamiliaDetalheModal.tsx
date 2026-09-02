@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { X, MapPin, Phone, User, CalendarDays, Plus, Edit2 } from 'lucide-react';
+import { X, MapPin, Phone, User, CalendarDays, Plus } from 'lucide-react';
 import type { Familia, Pessoa } from '../../types';
 import { useAppContext } from '../../context/AppContext';
 import { PessoaFormModal } from './forms/PessoaFormModal';
+import { PessoaPerfilModal } from './PessoaPerfilModal';
 import { pessoaService } from '../../services/pessoaService';
 
 interface FamiliaDetalheModalProps {
@@ -17,6 +18,7 @@ export const FamiliaDetalheModal: React.FC<FamiliaDetalheModalProps> = ({ famili
   const [activeTab, setActiveTab] = useState<'moradores' | 'visitas'>('moradores');
   const [showPessoaForm, setShowPessoaForm] = useState(false);
   const [pessoaParaEditar, setPessoaParaEditar] = useState<Pessoa | undefined>(undefined);
+  const [pessoaParaVerPerfil, setPessoaParaVerPerfil] = useState<Pessoa | undefined>(undefined);
   
   const moradores = pessoas.filter(p => p.familiaId === familia.id);
   const visitas = allVisitas.filter(v => v.familiaId === familia.id).sort((a, b) => new Date(b.dataVisita).getTime() - new Date(a.dataVisita).getTime());
@@ -74,7 +76,11 @@ export const FamiliaDetalheModal: React.FC<FamiliaDetalheModalProps> = ({ famili
           {activeTab === 'moradores' && (
             <>
               {moradores.map(m => (
-                <div key={m.id} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-start space-x-3">
+                <div 
+                  key={m.id} 
+                  onClick={() => setPessoaParaVerPerfil(m)}
+                  className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-start space-x-3 cursor-pointer active:scale-[0.98] transition-transform"
+                >
                   {m.fotoUrl ? (
                     <img src={m.fotoUrl} alt={m.nomeCompleto} className="w-10 h-10 rounded-full object-cover shrink-0 border border-gray-100" />
                   ) : (
@@ -87,15 +93,6 @@ export const FamiliaDetalheModal: React.FC<FamiliaDetalheModalProps> = ({ famili
                       <h4 className="font-bold text-[#1e1b4b] text-sm">{m.nomeCompleto}</h4>
                       <div className="flex items-center space-x-2">
                         <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-bold">{m.parentesco || m.categoria}</span>
-                        <button 
-                          onClick={() => {
-                            setPessoaParaEditar(m);
-                            setShowPessoaForm(true);
-                          }}
-                          className="p-1 text-gray-400 hover:text-[#8b5cf6] transition-colors"
-                        >
-                          <Edit2 size={14} />
-                        </button>
                       </div>
                     </div>
                     <div className="text-[11px] text-gray-500 mt-1 flex flex-col space-y-0.5">
@@ -188,6 +185,22 @@ export const FamiliaDetalheModal: React.FC<FamiliaDetalheModalProps> = ({ famili
               await pessoaService.create(pessoa);
             }
             setShowPessoaForm(false);
+            // Update the viewing profile context if it was being viewed
+            if (pessoaParaVerPerfil && pessoaParaVerPerfil.id === pessoa.id) {
+               setPessoaParaVerPerfil(pessoa as Pessoa);
+            }
+          }}
+        />
+      )}
+
+      {pessoaParaVerPerfil && !showPessoaForm && (
+        <PessoaPerfilModal 
+          pessoa={pessoaParaVerPerfil}
+          familia={familia}
+          onClose={() => setPessoaParaVerPerfil(undefined)}
+          onEdit={() => {
+            setPessoaParaEditar(pessoaParaVerPerfil);
+            setShowPessoaForm(true);
           }}
         />
       )}

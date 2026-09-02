@@ -21,6 +21,20 @@ export const frequenciaService = {
     return data as Frequencia[];
   },
 
+  // Busca as frequências de uma pessoa específica
+  async getFrequenciasDePessoa(pessoaId: string): Promise<Frequencia[]> {
+    const { data, error } = await supabase
+      .from('frequencias')
+      .select('*')
+      .eq('pessoaId', pessoaId);
+
+    if (error) {
+      console.error('Erro ao buscar frequências da pessoa:', error);
+      return [];
+    }
+    return data as Frequencia[];
+  },
+
   // Atualiza ou insere a presença/falta de um jovem
   async upsertFrequencia(reuniaoId: string, pessoaId: string, presente: boolean): Promise<void> {
     const { error } = await supabase
