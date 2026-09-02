@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, Users, MoreHorizontal, BookOpen, ShieldCheck } from 'lucide-react';
+import { Home, Users, BookOpen, ShieldCheck } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 
 export const MobileNavigation: React.FC = () => {

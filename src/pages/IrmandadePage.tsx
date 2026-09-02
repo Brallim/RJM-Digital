@@ -9,9 +9,10 @@ import { FamiliaFormModal } from '../components/irmandade/forms/FamiliaFormModal
 import { VisitaFormModal } from '../components/irmandade/forms/VisitaFormModal';
 import { familiaService } from '../services/familiaService';
 import { visitaService } from '../services/visitaService';
+import { AprovacaoList } from '../components/admin/AprovacaoList';
 
 export const IrmandadePage: React.FC = () => {
-  const { comunidadeAtiva, comunidades, familias, pessoas } = useAppContext();
+  const { comunidadeAtiva, comunidades, familias, pessoas, usuarioAtivo } = useAppContext();
   const [selectedComunidadesIds, setSelectedComunidadesIds] = useState<string[]>(
     comunidadeAtiva ? [comunidadeAtiva.id] : []
   );
@@ -133,6 +134,16 @@ export const IrmandadePage: React.FC = () => {
           familias={familiasDaComunidade}
           onFamiliaClick={handleFamiliaClick}
         />
+      )}
+
+      {/* Seção de Aprovação de Usuários (Apenas Cooperador) */}
+      {usuarioAtivo?.perfil === 'cooperador' && (
+        <div className="mt-8 mb-4">
+          <div className="flex items-center space-x-2 text-[#1e1b4b] mb-4">
+            <h2 className="text-lg font-bold">Solicitações de Acesso</h2>
+          </div>
+          <AprovacaoList />
+        </div>
       )}
 
       {selectedFamilia && !showFamiliaForm && (
