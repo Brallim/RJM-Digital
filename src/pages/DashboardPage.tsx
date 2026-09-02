@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAppContext } from '../context/AppContext';
 import { CasaOracaoIllustration } from '../components/dashboard/CasaOracaoIllustration';
-import { CalendarDays, Users, MapPin, ChevronRight, Bell, LogOut, Megaphone, HeartHandshake, User, Plus, ThumbsUp } from 'lucide-react';
+import { CalendarDays, Users, MapPin, ChevronRight, Bell, LogOut, Megaphone, HeartHandshake, Plus, ThumbsUp } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { RecitativosSection } from '../components/recitativos/RecitativosSection';
 import { avisoService } from '../services/avisoService';
