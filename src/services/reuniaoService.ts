@@ -50,6 +50,9 @@ export const reuniaoService = {
   },
   
   async delete(id: string): Promise<void> {
+    // Excluir possíveis frequências ligadas a esta reunião (cascade manual)
+    await supabase.from('frequencias').delete().eq('reuniaoId', id);
+
     const { error } = await supabase
       .from(TABLE_NAME)
       .delete()

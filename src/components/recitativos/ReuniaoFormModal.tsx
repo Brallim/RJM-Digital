@@ -1,18 +1,21 @@
 import React, { useState } from 'react';
-import { X, Save, Loader2 } from 'lucide-react';
+import { X, Save, Loader2, Trash2 } from 'lucide-react';
 import type { Reuniao } from '../../types';
+import { reuniaoService } from '../../services/reuniaoService';
 import { useAppContext } from '../../context/AppContext';
 
 interface ReuniaoFormModalProps {
   comunidadeId: string;
   onClose: () => void;
   onSave: (reuniao: Partial<Reuniao>) => Promise<void>;
+  onDelete?: () => void;
   initialData?: Reuniao;
 }
 
-export const ReuniaoFormModal: React.FC<ReuniaoFormModalProps> = ({ comunidadeId, onClose, onSave, initialData }) => {
+export const ReuniaoFormModal: React.FC<ReuniaoFormModalProps> = ({ comunidadeId, onClose, onSave, onDelete, initialData }) => {
   const { usuarioAtivo, pessoas } = useAppContext();
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   
   // Formata data para o input datetime-local
   const formatForInput = (dateString?: string) => {
@@ -82,6 +85,27 @@ export const ReuniaoFormModal: React.FC<ReuniaoFormModalProps> = ({ comunidadeId
       alert('Erro ao agendar reunião: ' + (error instanceof Error ? error.message : 'Tente novamente.'));
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!initialData?.id) return;
+    
+    if (confirm(`Tem certeza que deseja excluir esta reunião agendada para ${new Date(initialData.data).toLocaleDateString('pt-BR')}? Esta ação não pode ser desfeita.`)) {
+      setDeleting(true);
+      try {
+        await reuniaoService.delete(initialData.id);
+        if (onDelete) {
+          onDelete();
+        } else {
+          onClose();
+        }
+      } catch (error) {
+        console.error('Erro ao deletar reunião:', error);
+        alert('Erro ao excluir reunião. Tente novamente.');
+      } finally {
+        setDeleting(false);
+      }
     }
   };
 
@@ -256,12 +280,23 @@ export const ReuniaoFormModal: React.FC<ReuniaoFormModalProps> = ({ comunidadeId
         </div>
 
         {/* Footer actions */}
-        <div className="bg-white p-4 border-t border-gray-100 shrink-0">
+        <div className="bg-white p-4 border-t border-gray-100 shrink-0 flex space-x-3">
+          {initialData?.id && (
+            <button 
+              type="button"
+              onClick={handleDelete}
+              disabled={saving || deleting}
+              className="px-4 bg-red-50 text-red-500 rounded-2xl font-bold flex items-center justify-center shadow-sm active:scale-[0.98] transition-transform disabled:opacity-60 disabled:cursor-not-allowed"
+              title="Excluir Reunião"
+            >
+              {deleting ? <Loader2 size={20} className="animate-spin" /> : <Trash2 size={20} />}
+            </button>
+          )}
           <button 
             type="button"
             onClick={handleSalvar}
-            disabled={saving}
-            className="w-full bg-[#10b981] text-white rounded-2xl py-3.5 font-bold flex items-center justify-center shadow-md active:scale-[0.98] transition-transform disabled:opacity-60 disabled:cursor-not-allowed"
+            disabled={saving || deleting}
+            className="flex-1 bg-[#8b5cf6] text-white rounded-2xl py-3.5 font-bold flex items-center justify-center shadow-md active:scale-[0.98] transition-transform disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {saving ? (
               <>
@@ -269,7 +304,7 @@ export const ReuniaoFormModal: React.FC<ReuniaoFormModalProps> = ({ comunidadeId
               </>
             ) : (
               <>
-                <Save size={18} className="mr-2" /> Agendar Reunião
+                <Save size={18} className="mr-2" /> {initialData ? 'Atualizar' : 'Agendar Reunião'}
               </>
             )}
           </button>
