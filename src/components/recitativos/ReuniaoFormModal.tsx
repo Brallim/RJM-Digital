@@ -3,6 +3,7 @@ import { X, Save, Loader2, Trash2 } from 'lucide-react';
 import type { Reuniao } from '../../types';
 import { reuniaoService } from '../../services/reuniaoService';
 import { useAppContext } from '../../context/AppContext';
+import { BibleReferenceInput } from '../ui/BibleReferenceInput';
 
 interface ReuniaoFormModalProps {
   comunidadeId: string;
@@ -63,6 +64,10 @@ export const ReuniaoFormModal: React.FC<ReuniaoFormModalProps> = ({ comunidadeId
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleBibleRefChange = (name: string, value: string) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
@@ -200,8 +205,13 @@ export const ReuniaoFormModal: React.FC<ReuniaoFormModalProps> = ({ comunidadeId
                   </select>
                 </div>
                 <div>
-                  <label className="text-[10px] font-bold text-pink-700 block mb-1">Trecho (Ex: Salmo 23)</label>
-                  <input type="text" name="trechoMeninas" value={formData.trechoMeninas} onChange={handleChange} placeholder="Trecho Bíblico" className="w-full bg-white border border-pink-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:border-[#ff007f]" />
+                  <label className="text-[10px] font-bold text-pink-700 block mb-1">Trecho (Ex: 1:1-3)</label>
+                  <BibleReferenceInput 
+                    name="trechoMeninas" 
+                    value={formData.trechoMeninas || ''} 
+                    onChange={(val) => handleBibleRefChange('trechoMeninas', val)} 
+                    className="w-full"
+                  />
                 </div>
               </div>
             </div>
@@ -224,7 +234,12 @@ export const ReuniaoFormModal: React.FC<ReuniaoFormModalProps> = ({ comunidadeId
                 </div>
                 <div>
                   <label className="text-[10px] font-bold text-purple-700 block mb-1">Trecho Bíblico</label>
-                  <input type="text" name="trechoMocas" value={formData.trechoMocas} onChange={handleChange} placeholder="Trecho Bíblico" className="w-full bg-white border border-purple-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:border-[#7c3aed]" />
+                  <BibleReferenceInput 
+                    name="trechoMocas" 
+                    value={formData.trechoMocas || ''} 
+                    onChange={(val) => handleBibleRefChange('trechoMocas', val)} 
+                    className="w-full"
+                  />
                 </div>
               </div>
             </div>
@@ -247,7 +262,12 @@ export const ReuniaoFormModal: React.FC<ReuniaoFormModalProps> = ({ comunidadeId
                 </div>
                 <div>
                   <label className="text-[10px] font-bold text-blue-700 block mb-1">Trecho Bíblico</label>
-                  <input type="text" name="trechoMeninos" value={formData.trechoMeninos} onChange={handleChange} placeholder="Trecho Bíblico" className="w-full bg-white border border-blue-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:border-[#0ea5e9]" />
+                  <BibleReferenceInput 
+                    name="trechoMeninos" 
+                    value={formData.trechoMeninos || ''} 
+                    onChange={(val) => handleBibleRefChange('trechoMeninos', val)} 
+                    className="w-full"
+                  />
                 </div>
               </div>
             </div>
@@ -270,7 +290,12 @@ export const ReuniaoFormModal: React.FC<ReuniaoFormModalProps> = ({ comunidadeId
                 </div>
                 <div>
                   <label className="text-[10px] font-bold text-emerald-700 block mb-1">Trecho Bíblico</label>
-                  <input type="text" name="trechoMocos" value={formData.trechoMocos} onChange={handleChange} placeholder="Trecho Bíblico" className="w-full bg-white border border-emerald-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:border-[#10b981]" />
+                  <BibleReferenceInput 
+                    name="trechoMocos" 
+                    value={formData.trechoMocos || ''} 
+                    onChange={(val) => handleBibleRefChange('trechoMocos', val)} 
+                    className="w-full"
+                  />
                 </div>
               </div>
             </div>
