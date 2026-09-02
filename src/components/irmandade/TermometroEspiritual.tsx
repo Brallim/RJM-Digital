@@ -4,6 +4,7 @@ import { frequenciaService } from '../../services/frequenciaService';
 import { termometroConfig } from '../../config/termometroConfig';
 import type { Pessoa } from '../../types';
 import { TermometroDetalhesModal } from './TermometroDetalhesModal';
+import { getDefaultAvatar } from '../../utils/avatar';
 
 interface TermometroEspiritualProps {
   pessoa: Pessoa;
@@ -123,8 +124,8 @@ export const TermometroEspiritual: React.FC<TermometroEspiritualProps> = ({ pess
           <div className="flex items-center space-x-3">
             {/* Foto */}
             <div className={`w-14 h-14 rounded-full border-2 border-white shadow-sm overflow-hidden flex-shrink-0 flex items-center justify-center ${avatarFallback}`}>
-              {pessoa.fotoUrl ? (
-                <img src={pessoa.fotoUrl} alt={pessoa.nomeCompleto} className="w-full h-full object-cover" />
+              {getDefaultAvatar(pessoa) ? (
+                <img src={getDefaultAvatar(pessoa)!} alt={pessoa.nomeCompleto} className="w-full h-full object-cover" />
               ) : (
                 <span className="font-bold text-lg">{pessoa.nomeCompleto.charAt(0)}</span>
               )}

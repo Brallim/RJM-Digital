@@ -5,6 +5,7 @@ import { reuniaoService } from '../../services/reuniaoService';
 import { frequenciaService } from '../../services/frequenciaService';
 import { ReuniaoFormModal } from './ReuniaoFormModal';
 import type { Reuniao } from '../../types';
+import { getDefaultAvatar } from '../../utils/avatar';
 
 export const RecitativosSection: React.FC = () => {
   const { usuarioAtivo, comunidadeAtiva, pessoas, reunioes } = useAppContext();
@@ -271,9 +272,9 @@ export const RecitativosSection: React.FC = () => {
                       {/* Avatar */}
                       <div className="w-12 h-12 rounded-full bg-gray-50 overflow-hidden flex-shrink-0 border border-gray-100">
                         <img 
-                          src={participante.fotoUrl || `https://api.dicebear.com/7.x/notionists/svg?seed=${participante.nomeCompleto}`} 
-                          alt="avatar" 
-                          className={`w-full h-full object-cover ${!participante.fotoUrl ? 'scale-110' : ''}`} 
+                          src={getDefaultAvatar(participante) || `https://api.dicebear.com/7.x/notionists/svg?seed=${participante.nomeCompleto}`} 
+                          alt="" 
+                          className={`w-full h-full object-cover ${!getDefaultAvatar(participante) ? 'scale-110' : ''}`} 
                         />
                       </div>
                       

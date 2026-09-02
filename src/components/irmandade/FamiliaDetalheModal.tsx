@@ -5,6 +5,7 @@ import { useAppContext } from '../../context/AppContext';
 import { PessoaFormModal } from './forms/PessoaFormModal';
 import { PessoaPerfilModal } from './PessoaPerfilModal';
 import { pessoaService } from '../../services/pessoaService';
+import { getDefaultAvatar } from '../../utils/avatar';
 
 interface FamiliaDetalheModalProps {
   familia: Familia;
@@ -81,8 +82,8 @@ export const FamiliaDetalheModal: React.FC<FamiliaDetalheModalProps> = ({ famili
                   onClick={() => setPessoaParaVerPerfil(m)}
                   className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-start space-x-3 cursor-pointer active:scale-[0.98] transition-transform"
                 >
-                  {m.fotoUrl ? (
-                    <img src={m.fotoUrl} alt={m.nomeCompleto} className="w-10 h-10 rounded-full object-cover shrink-0 border border-gray-100" />
+                  {getDefaultAvatar(m) ? (
+                    <img src={getDefaultAvatar(m)!} alt={m.nomeCompleto} className="w-10 h-10 rounded-full object-cover shrink-0 border border-gray-100" />
                   ) : (
                     <div className="w-10 h-10 bg-[#f5f3ff] rounded-full flex items-center justify-center text-[#8b5cf6] shrink-0">
                       <User size={20} />

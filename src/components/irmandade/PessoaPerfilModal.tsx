@@ -2,6 +2,7 @@ import React from 'react';
 import { X, Edit2, User, Phone, MapPin, CalendarDays, Droplets } from 'lucide-react';
 import type { Pessoa, Familia } from '../../types';
 import { TermometroEspiritual } from './TermometroEspiritual';
+import { getDefaultAvatar } from '../../utils/avatar';
 
 interface PessoaPerfilModalProps {
   pessoa: Pessoa;
@@ -54,8 +55,8 @@ export const PessoaPerfilModal: React.FC<PessoaPerfilModalProps> = ({ pessoa, fa
             <div className={`absolute top-0 left-0 right-0 h-16 ${themeBg} opacity-50`}></div>
             
             <div className={`w-24 h-24 rounded-full border-4 border-white shadow-md overflow-hidden flex items-center justify-center relative z-10 ${themeBg} ${themeColor} mb-4`}>
-              {pessoa.fotoUrl ? (
-                <img src={pessoa.fotoUrl} alt={pessoa.nomeCompleto} className="w-full h-full object-cover" />
+              {getDefaultAvatar(pessoa) ? (
+                <img src={getDefaultAvatar(pessoa)!} alt={pessoa.nomeCompleto} className="w-full h-full object-cover" />
               ) : (
                 <User size={40} />
               )}

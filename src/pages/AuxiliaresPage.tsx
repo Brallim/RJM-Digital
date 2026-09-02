@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAppContext } from '../context/AppContext';
 import { Users, BookOpen } from 'lucide-react';
+import { getDefaultAvatar } from '../utils/avatar';
 
 export const AuxiliaresPage: React.FC = () => {
   const { pessoas } = useAppContext();
@@ -27,8 +28,8 @@ export const AuxiliaresPage: React.FC = () => {
         <div className="space-y-4">
           {auxiliares.map(a => (
             <div key={a.id} className="bg-white p-4 rounded-2xl border border-purple-100 shadow-sm flex items-start space-x-4">
-              {a.fotoUrl ? (
-                <img src={a.fotoUrl} alt={a.nomeCompleto} className="w-12 h-12 rounded-full object-cover shrink-0 border-2 border-purple-100" />
+              {getDefaultAvatar({ fotoUrl: a.fotoUrl, categoria: 'adulto', sexo: a.sexo }) ? (
+                <img src={getDefaultAvatar({ fotoUrl: a.fotoUrl, categoria: 'adulto', sexo: a.sexo })!} alt={a.nomeCompleto} className="w-12 h-12 rounded-full object-cover shrink-0 border-2 border-purple-100" />
               ) : (
                 <div className="w-12 h-12 bg-[#f5f3ff] rounded-full flex items-center justify-center text-[#8b5cf6] shrink-0 border border-purple-100">
                   <Users size={24} />
