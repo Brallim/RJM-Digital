@@ -185,25 +185,25 @@ export const DashboardPage: React.FC = () => {
         <div className="grid grid-cols-4 gap-2 mb-2">
           {/* Meninas */}
           <div className="bg-[#fff0f6] rounded-3xl p-2 flex flex-col items-center justify-center border border-pink-100 shadow-sm h-[100px]">
-            <User size={20} className="text-[#ff007f] mb-1" />
+            <img src="/avatars/menina.jpg" alt="Meninas" className="w-8 h-8 rounded-full object-cover mb-1 border border-pink-200 shadow-sm" />
             <span className="text-xl font-black text-[#ff007f] leading-none mb-1">{numMeninas}</span>
             <span className="text-[9px] text-[#ff007f] font-bold text-center leading-[1.1]">Meninas<br/>Cadastradas</span>
           </div>
           {/* Moças */}
           <div className="bg-[#f5f3ff] rounded-3xl p-2 flex flex-col items-center justify-center border border-purple-100 shadow-sm h-[100px]">
-            <User size={20} className="text-[#7c3aed] mb-1" />
+            <img src="/avatars/moca.jpg" alt="Moças" className="w-8 h-8 rounded-full object-cover mb-1 border border-purple-200 shadow-sm" />
             <span className="text-xl font-black text-[#7c3aed] leading-none mb-1">{numMocas}</span>
             <span className="text-[9px] text-[#7c3aed] font-bold text-center leading-[1.1]">Moças<br/>Cadastradas</span>
           </div>
           {/* Meninos */}
           <div className="bg-[#f0f9ff] rounded-3xl p-2 flex flex-col items-center justify-center border border-blue-100 shadow-sm h-[100px]">
-            <User size={20} className="text-[#0ea5e9] mb-1" />
+            <img src="/avatars/menino.jpg" alt="Meninos" className="w-8 h-8 rounded-full object-cover mb-1 border border-blue-200 shadow-sm" />
             <span className="text-xl font-black text-[#0ea5e9] leading-none mb-1">{numMeninos}</span>
             <span className="text-[9px] text-[#0ea5e9] font-bold text-center leading-[1.1]">Meninos<br/>Cadastrados</span>
           </div>
           {/* Moços */}
           <div className="bg-[#ecfdf5] rounded-3xl p-2 flex flex-col items-center justify-center border border-emerald-100 shadow-sm h-[100px]">
-            <User size={20} className="text-[#10b981] mb-1" />
+            <img src="/avatars/moco.jpg" alt="Moços" className="w-8 h-8 rounded-full object-cover mb-1 border border-emerald-200 shadow-sm" />
             <span className="text-xl font-black text-[#10b981] leading-none mb-1">{numMocos}</span>
             <span className="text-[9px] text-[#10b981] font-bold text-center leading-[1.1]">Moços<br/>Cadastrados</span>
           </div>
