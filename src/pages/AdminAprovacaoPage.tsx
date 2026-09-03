@@ -6,7 +6,7 @@ import { ShieldCheck, UserCheck, CheckCircle, Clock } from 'lucide-react';
 
 export const AdminAprovacaoPage: React.FC = () => {
   const { usuarioAtivo, pessoas } = useAppContext();
-  const [usuariosPendentes, setUsuariosPendentes] = useState<Usuario[]>([]);
+  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [loading, setLoading] = useState(true);
   
   const [selectedPerfil, setSelectedPerfil] = useState<Record<string, string>>({});
@@ -21,9 +21,9 @@ export const AdminAprovacaoPage: React.FC = () => {
     const { data } = await supabase
       .from('usuarios')
       .select('*')
-      .eq('ativo', false);
+      .order('ativo', { ascending: true });
     
-    if (data) setUsuariosPendentes(data as Usuario[]);
+    if (data) setUsuarios(data as Usuario[]);
     setLoading(false);
   };
 
@@ -49,7 +49,7 @@ export const AdminAprovacaoPage: React.FC = () => {
         
       if (error) throw error;
       
-      alert('Usuário aprovado com sucesso!');
+      alert('Usuário atualizado com sucesso! (Pode ser necessário recarregar a página para aplicar no seu próprio usuário)');
       fetchPendentes();
     } catch (error: any) {
       console.error(error);
@@ -75,23 +75,29 @@ export const AdminAprovacaoPage: React.FC = () => {
 
       {loading ? (
         <div className="text-center p-8 text-gray-400">Carregando...</div>
-      ) : usuariosPendentes.length === 0 ? (
+      ) : usuarios.length === 0 ? (
         <div className="bg-white rounded-2xl border border-dashed border-gray-200 p-8 text-center">
           <CheckCircle size={40} className="mx-auto text-green-400 mb-3" />
-          <p className="text-gray-500 font-medium">Nenhum usuário aguardando aprovação.</p>
+          <p className="text-gray-500 font-medium">Nenhum usuário encontrado no sistema.</p>
         </div>
       ) : (
         <div className="space-y-4">
-          {usuariosPendentes.map(u => (
+          {usuarios.map(u => (
             <div key={u.id} className="bg-white p-5 rounded-[24px] border border-[#f3f4f6] shadow-sm">
               <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-3">
                 <div>
                   <h3 className="font-bold text-[#1e1b4b] text-lg">{u.nome}</h3>
                   <p className="text-sm text-gray-500">{u.email}</p>
                 </div>
-                <div className="bg-amber-50 text-amber-600 px-3 py-1 rounded-full text-xs font-bold flex items-center">
-                  <Clock size={14} className="mr-1" /> Pendente
-                </div>
+                {u.ativo ? (
+                  <div className="bg-green-50 text-green-600 px-3 py-1 rounded-full text-xs font-bold flex items-center">
+                    <CheckCircle size={14} className="mr-1" /> Ativo
+                  </div>
+                ) : (
+                  <div className="bg-amber-50 text-amber-600 px-3 py-1 rounded-full text-xs font-bold flex items-center">
+                    <Clock size={14} className="mr-1" /> Pendente
+                  </div>
+                )}
               </div>
 
               <div className="space-y-4">
@@ -99,7 +105,7 @@ export const AdminAprovacaoPage: React.FC = () => {
                   <label className="text-xs font-bold text-gray-700 block mb-1">Definir Perfil de Acesso</label>
                   <select
                     className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[#8b5cf6]"
-                    value={selectedPerfil[u.id] || ''}
+                    value={selectedPerfil[u.id] || u.perfil || ''}
                     onChange={(e) => setSelectedPerfil(prev => ({ ...prev, [u.id]: e.target.value }))}
                   >
                     <option value="">Selecione...</option>
@@ -114,7 +120,7 @@ export const AdminAprovacaoPage: React.FC = () => {
                   <label className="text-xs font-bold text-gray-700 block mb-1">Vincular à Pessoa (Morador)</label>
                   <select
                     className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[#8b5cf6]"
-                    value={selectedPessoa[u.id] || ''}
+                    value={selectedPessoa[u.id] || u.pessoaId || ''}
                     onChange={(e) => setSelectedPessoa(prev => ({ ...prev, [u.id]: e.target.value }))}
                   >
                     <option value="">Nenhum vínculo...</option>
@@ -127,9 +133,9 @@ export const AdminAprovacaoPage: React.FC = () => {
 
                 <button
                   onClick={() => handleAprovar(u)}
-                  className="w-full bg-[#10b981] text-white rounded-xl py-2.5 font-bold shadow-sm"
+                  className={`w-full text-white rounded-xl py-2.5 font-bold shadow-sm transition-colors ${u.ativo ? 'bg-[#3b82f6]' : 'bg-[#10b981]'}`}
                 >
-                  Aprovar Usuário
+                  {u.ativo ? 'Atualizar Vínculo/Perfil' : 'Aprovar Usuário'}
                 </button>
               </div>
             </div>
