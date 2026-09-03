@@ -120,6 +120,14 @@ export const MinhaFamiliaPage: React.FC = () => {
               'emerald': 'bg-emerald-500',
             };
 
+            const labelMap: Record<string, string> = {
+              'menino': 'Menino',
+              'menina': 'Menina',
+              'moco': 'Moço',
+              'moca': 'Moça',
+              'adulto': 'Adulto'
+            };
+
             return (
               <div key={jovem.id} className="bg-white rounded-[24px] overflow-hidden shadow-sm border border-gray-100">
                 {/* Faixa superior com a cor */}
@@ -133,7 +141,7 @@ export const MinhaFamiliaPage: React.FC = () => {
                     <div>
                       <h3 className="font-bold text-[#1e1b4b] text-[16px] leading-tight mb-1">{jovem.nomeCompleto}</h3>
                       <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${bgMap[colorTheme]}`}>
-                        {jovem.categoria}
+                        {labelMap[jovem.categoria] || jovem.categoria}
                       </span>
                     </div>
                   </div>
