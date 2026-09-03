@@ -2,8 +2,10 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
 import type { Usuario, Pessoa, Perfil } from '../types';
 import { useAppContext } from '../context/AppContext';
-import { UserCog, CheckCircle, Clock, ShieldAlert, User, Search, Link as LinkIcon, Unlink, X } from 'lucide-react';
+import { UserCog, CheckCircle, Clock, ShieldAlert, User, Search, Link as LinkIcon, Unlink, X, Plus, ArrowLeft } from 'lucide-react';
 import { getDefaultAvatar } from '../utils/avatar';
+import { familiaService } from '../services/familiaService';
+import { pessoaService } from '../services/pessoaService';
 
 type SituacaoGeral = 'pendente' | 'sem_acesso' | 'vinculado';
 
@@ -30,6 +32,15 @@ export const UsuariosPage: React.FC = () => {
   const [selectedPessoaId, setSelectedPessoaId] = useState<string>('');
   const [selectedPerfil, setSelectedPerfil] = useState<Perfil | ''>('');
   const [buscaPessoaModal, setBuscaPessoaModal] = useState('');
+
+  // Quick Add State
+  const [showQuickAdd, setShowQuickAdd] = useState(false);
+  const [quickAddData, setQuickAddData] = useState({
+    nomeDaFamilia: '',
+    dataNascimento: '',
+    sexo: 'F',
+    categoria: 'adulto'
+  });
 
   useEffect(() => {
     fetchUsuarios();
@@ -123,29 +134,81 @@ export const UsuariosPage: React.FC = () => {
     }
     
     setBuscaPessoaModal('');
+    setShowQuickAdd(false);
     setModalOpen(true);
+  };
+
+  const handleQuickAddChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setQuickAddData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSalvarVinculo = async () => {
     if (!itemSelecionado?.usuario) return;
-    if (!selectedPessoaId || !selectedPerfil) {
-      alert('Selecione o morador correspondente e o perfil de acesso.');
-      return;
-    }
+    
+    let finalPessoaId = selectedPessoaId;
+    
+    if (showQuickAdd) {
+      if (!quickAddData.nomeDaFamilia || !quickAddData.dataNascimento || !quickAddData.categoria) {
+        alert('Por favor, preencha todos os campos do cadastro rápido.');
+        return;
+      }
+      if (!selectedPerfil) {
+        alert('Por favor, selecione o perfil de acesso.');
+        return;
+      }
+      
+      try {
+        // 1. Criar Família (com dados mínimos)
+        const novaFamilia = await familiaService.create({
+          nomeFamilia: quickAddData.nomeDaFamilia,
+          endereco: 'Não informado',
+          numero: 'S/N',
+          bairro: 'Não informado',
+          cidade: 'Não informado',
+          cep: '00000000',
+          comunidadeId: usuarioAtivo?.comunidadesPermitidas[0] || '1', // fallback
+          ativo: true
+        });
 
-    // Regra de Integridade: Verificar duplicidade
-    // Verificar se já existe OUTRO usuário vinculado a esta pessoa
-    const conflito = usuarios.find(u => u.pessoaId === selectedPessoaId && u.id !== itemSelecionado.usuario!.id);
-    if (conflito) {
-      alert('Esta pessoa já possui uma conta de acesso vinculada (' + conflito.email + '). Não é possível vincular duas contas à mesma pessoa.');
-      return;
+        // 2. Criar Pessoa
+        const novaPessoa = await pessoaService.create({
+          nomeCompleto: itemSelecionado.usuario.nome, // Pega o nome do usuário
+          dataNascimento: quickAddData.dataNascimento,
+          sexo: quickAddData.sexo as any,
+          categoria: quickAddData.categoria as any,
+          familiaId: novaFamilia.id,
+          comunidadeId: novaFamilia.comunidadeId,
+          batizado: false,
+          ativo: true
+        });
+
+        finalPessoaId = novaPessoa.id;
+        
+      } catch (error: any) {
+        console.error('Erro ao criar cadastro rápido:', error);
+        alert('Erro ao criar cadastro: ' + error.message);
+        return;
+      }
+    } else {
+      if (!finalPessoaId || !selectedPerfil) {
+        alert('Selecione o morador correspondente e o perfil de acesso.');
+        return;
+      }
+
+      // Regra de Integridade: Verificar duplicidade
+      const conflito = usuarios.find(u => u.pessoaId === finalPessoaId && u.id !== itemSelecionado.usuario!.id);
+      if (conflito) {
+        alert('Esta pessoa já possui uma conta de acesso vinculada (' + conflito.email + '). Não é possível vincular duas contas à mesma pessoa.');
+        return;
+      }
     }
 
     try {
       const { error } = await supabase
         .from('usuarios')
         .update({
-          pessoaId: selectedPessoaId,
+          pessoaId: finalPessoaId,
           perfil: selectedPerfil,
           status: 'ativo',
           ativo: true // Mantido por compatibilidade
@@ -380,44 +443,126 @@ export const UsuariosPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Passo 2: Selecionar Pessoa */}
+              {/* Passo 2: Selecionar Pessoa ou Cadastro Rápido */}
               <div>
-                <label className="text-xs font-bold text-[#1e1b4b] block mb-2">Selecionar Cadastro da Irmandade (Pessoa) *</label>
-                
-                {/* Campo de Busca de Pessoas no Modal */}
-                <div className="relative mb-3">
-                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Pesquisar pessoa..."
-                    value={buscaPessoaModal}
-                    onChange={(e) => setBuscaPessoaModal(e.target.value)}
-                    className="w-full bg-white border border-gray-200 rounded-xl pl-9 pr-3 py-2 text-sm focus:outline-none focus:border-[#8b5cf6] focus:ring-1 focus:ring-[#8b5cf6] transition-all"
-                  />
-                </div>
-                
-                <div className="max-h-48 overflow-y-auto rounded-xl border border-gray-200 bg-white">
-                  {pessoasParaVinculo.length === 0 ? (
-                    <div className="p-4 text-center text-sm text-gray-500">Nenhuma pessoa disponível.</div>
-                  ) : (
-                    pessoasParaVinculo.map(p => (
-                      <div 
-                        key={p.id} 
-                        onClick={() => setSelectedPessoaId(p.id)}
-                        className={`p-3 border-b border-gray-50 flex items-center space-x-3 cursor-pointer transition-colors ${selectedPessoaId === p.id ? 'bg-purple-50' : 'hover:bg-gray-50'}`}
-                      >
-                        <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-100 shrink-0">
-                          <img src={getDefaultAvatar(p)!} alt="" className="w-full h-full object-cover" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className={`text-sm font-bold truncate ${selectedPessoaId === p.id ? 'text-[#8b5cf6]' : 'text-gray-700'}`}>{p.nomeCompleto}</p>
-                          <p className="text-[10px] text-gray-500 truncate capitalize">{p.categoria} • Família {p.familiaId.substring(0, 4)}</p>
-                        </div>
-                        {selectedPessoaId === p.id && <CheckCircle size={18} className="text-[#8b5cf6]" />}
-                      </div>
-                    ))
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-bold text-[#1e1b4b]">
+                    {showQuickAdd ? 'Cadastrar Novo Morador e Família *' : 'Selecionar Cadastro da Irmandade (Pessoa) *'}
+                  </label>
+                  {!showQuickAdd && itemSelecionado.situacao !== 'vinculado' && (
+                    <button 
+                      onClick={() => setShowQuickAdd(true)}
+                      className="text-[10px] font-bold text-[#8b5cf6] bg-purple-50 px-2 py-1 rounded-lg flex items-center hover:bg-purple-100 transition-colors"
+                    >
+                      <Plus size={12} className="mr-1" /> Novo Cadastro
+                    </button>
+                  )}
+                  {showQuickAdd && (
+                    <button 
+                      onClick={() => setShowQuickAdd(false)}
+                      className="text-[10px] font-bold text-gray-500 bg-gray-100 px-2 py-1 rounded-lg flex items-center hover:bg-gray-200 transition-colors"
+                    >
+                      <ArrowLeft size={12} className="mr-1" /> Voltar para Busca
+                    </button>
                   )}
                 </div>
+                
+                {showQuickAdd ? (
+                  <div className="bg-purple-50/50 p-4 rounded-xl border border-purple-100 space-y-3 animate-in fade-in slide-in-from-top-2">
+                    <div>
+                      <label className="text-[10px] font-bold text-gray-600 block mb-1">Nome da Nova Família *</label>
+                      <input
+                        type="text"
+                        name="nomeDaFamilia"
+                        placeholder="Ex: Família Silva"
+                        value={quickAddData.nomeDaFamilia}
+                        onChange={handleQuickAddChange}
+                        className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8b5cf6]"
+                      />
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-[10px] font-bold text-gray-600 block mb-1">Data de Nascimento *</label>
+                        <input
+                          type="date"
+                          name="dataNascimento"
+                          value={quickAddData.dataNascimento}
+                          onChange={handleQuickAddChange}
+                          className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8b5cf6]"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold text-gray-600 block mb-1">Sexo *</label>
+                        <select
+                          name="sexo"
+                          value={quickAddData.sexo}
+                          onChange={handleQuickAddChange}
+                          className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8b5cf6]"
+                        >
+                          <option value="M">Masculino</option>
+                          <option value="F">Feminino</option>
+                        </select>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className="text-[10px] font-bold text-gray-600 block mb-1">Categoria *</label>
+                      <select
+                        name="categoria"
+                        value={quickAddData.categoria}
+                        onChange={handleQuickAddChange}
+                        className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8b5cf6]"
+                      >
+                        <option value="adulto">Adulto</option>
+                        <option value="jovem">Jovem (Geral)</option>
+                        <option value="moco">Moço</option>
+                        <option value="moca">Moça</option>
+                        <option value="menino">Menino</option>
+                        <option value="menina">Menina</option>
+                      </select>
+                    </div>
+                    <p className="text-[9px] text-gray-400 leading-tight">
+                      Este formulário criará uma família e um morador básicos. O nome do morador será o mesmo da conta ({itemSelecionado.usuario.nome}). Você poderá editar os demais dados na aba Famílias depois.
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="relative mb-3">
+                      <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <input
+                        type="text"
+                        placeholder="Pesquisar pessoa..."
+                        value={buscaPessoaModal}
+                        onChange={(e) => setBuscaPessoaModal(e.target.value)}
+                        className="w-full bg-white border border-gray-200 rounded-xl pl-9 pr-3 py-2 text-sm focus:outline-none focus:border-[#8b5cf6] focus:ring-1 focus:ring-[#8b5cf6] transition-all"
+                      />
+                    </div>
+                    
+                    <div className="max-h-48 overflow-y-auto rounded-xl border border-gray-200 bg-white">
+                      {pessoasParaVinculo.length === 0 ? (
+                        <div className="p-4 text-center text-sm text-gray-500">Nenhuma pessoa disponível.</div>
+                      ) : (
+                        pessoasParaVinculo.map(p => (
+                          <div 
+                            key={p.id} 
+                            onClick={() => setSelectedPessoaId(p.id)}
+                            className={`p-3 border-b border-gray-50 flex items-center space-x-3 cursor-pointer transition-colors ${selectedPessoaId === p.id ? 'bg-purple-50' : 'hover:bg-gray-50'}`}
+                          >
+                            <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-100 shrink-0">
+                              <img src={getDefaultAvatar(p)!} alt="" className="w-full h-full object-cover" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className={`text-sm font-bold truncate ${selectedPessoaId === p.id ? 'text-[#8b5cf6]' : 'text-gray-700'}`}>{p.nomeCompleto}</p>
+                              <p className="text-[10px] text-gray-500 truncate capitalize">{p.categoria} • Família {p.familiaId.substring(0, 4)}</p>
+                            </div>
+                            {selectedPessoaId === p.id && <CheckCircle size={18} className="text-[#8b5cf6]" />}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* Passo 3: Perfil */}
