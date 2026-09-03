@@ -40,7 +40,7 @@ export const UsuariosPage: React.FC = () => {
     const { data } = await supabase
       .from('usuarios')
       .select('*')
-      .order('created_at', { ascending: false });
+      .order('createdAt', { ascending: false });
     
     if (data) setUsuarios(data as Usuario[]);
     setLoading(false);
