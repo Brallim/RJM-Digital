@@ -13,6 +13,7 @@ export interface Usuario {
   status: StatusUsuario;
   comunidadesPermitidas: string[];
   ativo?: boolean; // Mantido por compatibilidade por enquanto
+  dadosCadastro?: any; // Informações coletadas durante o signup
 }
 
 export interface Comunidade {

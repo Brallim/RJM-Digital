@@ -9,6 +9,19 @@ export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [nome, setNome] = useState('');
+  
+  // Extended signup fields
+  const [dataNascimento, setDataNascimento] = useState('');
+  const [sexo, setSexo] = useState('M');
+  const [categoria, setCategoria] = useState('adulto');
+  const [batizado, setBatizado] = useState(false);
+  const [dataBatismo, setDataBatismo] = useState('');
+  const [comunidadeId, setComunidadeId] = useState('1'); // 1 = Jardim Bom Clima
+  const [endereco, setEndereco] = useState('');
+  const [numero, setNumero] = useState('');
+  const [bairro, setBairro] = useState('');
+  const [cidade, setCidade] = useState('');
+  const [cep, setCep] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { usuarioAtivo } = useAppContext();
@@ -28,6 +41,24 @@ export const LoginPage: React.FC = () => {
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            data: {
+              nome,
+              dadosCadastro: {
+                dataNascimento,
+                sexo,
+                categoria,
+                batizado,
+                dataBatismo: batizado ? dataBatismo : null,
+                comunidadeId,
+                endereco,
+                numero,
+                bairro,
+                cidade,
+                cep
+              }
+            }
+          }
         });
 
         if (error) throw error;
@@ -87,6 +118,7 @@ export const LoginPage: React.FC = () => {
 
           <form onSubmit={handleAuth} className="space-y-4">
             {isSignUp && (
+              <>
               <div>
                 <label className="text-xs font-bold text-gray-700 block mb-1">Seu Nome</label>
                 <div className="relative">
@@ -103,6 +135,141 @@ export const LoginPage: React.FC = () => {
                   />
                 </div>
               </div>
+
+              {/* DADOS PESSOAIS */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-bold text-gray-700 block mb-1">Data Nasc.</label>
+                  <input
+                    type="date"
+                    required
+                    value={dataNascimento}
+                    onChange={(e) => setDataNascimento(e.target.value)}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-3 text-sm focus:outline-none focus:border-[#8b5cf6] focus:bg-white transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-gray-700 block mb-1">Sexo</label>
+                  <select
+                    value={sexo}
+                    onChange={(e) => setSexo(e.target.value)}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-3 text-sm focus:outline-none focus:border-[#8b5cf6] focus:bg-white transition-colors"
+                  >
+                    <option value="M">Masculino</option>
+                    <option value="F">Feminino</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-bold text-gray-700 block mb-1">Categoria</label>
+                  <select
+                    value={categoria}
+                    onChange={(e) => setCategoria(e.target.value)}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-3 text-sm focus:outline-none focus:border-[#8b5cf6] focus:bg-white transition-colors"
+                  >
+                    <option value="adulto">Adulto</option>
+                    <option value="jovem">Jovem (Geral)</option>
+                    <option value="moco">Moço</option>
+                    <option value="moca">Moça</option>
+                    <option value="menino">Menino</option>
+                    <option value="menina">Menina</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-gray-700 block mb-1">Comunidade</label>
+                  <select
+                    value={comunidadeId}
+                    onChange={(e) => setComunidadeId(e.target.value)}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-3 text-sm focus:outline-none focus:border-[#8b5cf6] focus:bg-white transition-colors"
+                  >
+                    <option value="1">Jardim Bom Clima</option>
+                    <option value="2">Jardim Planalto</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 p-3 rounded-xl border border-gray-200">
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={batizado}
+                    onChange={(e) => setBatizado(e.target.checked)}
+                    className="rounded text-[#8b5cf6] focus:ring-[#8b5cf6]"
+                  />
+                  <span className="text-sm font-bold text-gray-700">Sou Batizado(a)</span>
+                </label>
+                
+                {batizado && (
+                  <div className="mt-3">
+                    <label className="text-xs font-bold text-gray-700 block mb-1">Data do Batismo</label>
+                    <input
+                      type="date"
+                      required={batizado}
+                      value={dataBatismo}
+                      onChange={(e) => setDataBatismo(e.target.value)}
+                      className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[#8b5cf6]"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* ENDEREÇO */}
+              <div className="space-y-3 pt-2 border-t border-gray-100">
+                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Endereço</h3>
+                
+                <div className="grid grid-cols-4 gap-3">
+                  <div className="col-span-3">
+                    <input
+                      type="text"
+                      required
+                      placeholder="Rua / Avenida"
+                      value={endereco}
+                      onChange={(e) => setEndereco(e.target.value)}
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-3 text-sm focus:outline-none focus:border-[#8b5cf6] focus:bg-white transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Nº"
+                      value={numero}
+                      onChange={(e) => setNumero(e.target.value)}
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-3 text-sm focus:outline-none focus:border-[#8b5cf6] focus:bg-white transition-colors"
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-3 gap-3">
+                  <input
+                    type="text"
+                    required
+                    placeholder="Bairro"
+                    value={bairro}
+                    onChange={(e) => setBairro(e.target.value)}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-3 text-sm focus:outline-none focus:border-[#8b5cf6] focus:bg-white transition-colors"
+                  />
+                  <input
+                    type="text"
+                    required
+                    placeholder="Cidade"
+                    value={cidade}
+                    onChange={(e) => setCidade(e.target.value)}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-3 text-sm focus:outline-none focus:border-[#8b5cf6] focus:bg-white transition-colors"
+                  />
+                  <input
+                    type="text"
+                    required
+                    placeholder="CEP"
+                    value={cep}
+                    onChange={(e) => setCep(e.target.value)}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-3 text-sm focus:outline-none focus:border-[#8b5cf6] focus:bg-white transition-colors"
+                  />
+                </div>
+              </div>
+            </>
             )}
             
             <div>

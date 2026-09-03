@@ -38,8 +38,16 @@ export const UsuariosPage: React.FC = () => {
   const [quickAddData, setQuickAddData] = useState({
     nomeDaFamilia: '',
     dataNascimento: '',
-    sexo: 'F',
-    categoria: 'adulto'
+    sexo: 'M',
+    categoria: 'adulto',
+    batizado: false,
+    dataBatismo: '',
+    comunidadeId: '1',
+    endereco: '',
+    numero: '',
+    bairro: '',
+    cidade: '',
+    cep: ''
   });
 
   useEffect(() => {
@@ -134,6 +142,45 @@ export const UsuariosPage: React.FC = () => {
     }
     
     setBuscaPessoaModal('');
+    
+    // Pre-fill from signup data if available
+    if (item.situacao === 'pendente' && item.usuario?.dadosCadastro) {
+      const d = item.usuario.dadosCadastro;
+      // Tentar deduzir o nome da família a partir do último sobrenome
+      const nomes = item.usuario.nome.split(' ');
+      const ultimoSobrenome = nomes.length > 1 ? nomes[nomes.length - 1] : '';
+      
+      setQuickAddData({
+        nomeDaFamilia: ultimoSobrenome ? `Família ${ultimoSobrenome}` : '',
+        dataNascimento: d.dataNascimento || '',
+        sexo: d.sexo || 'M',
+        categoria: d.categoria || 'adulto',
+        batizado: d.batizado || false,
+        dataBatismo: d.dataBatismo || '',
+        comunidadeId: d.comunidadeId || usuarioAtivo?.comunidadesPermitidas[0] || '1',
+        endereco: d.endereco || '',
+        numero: d.numero || '',
+        bairro: d.bairro || '',
+        cidade: d.cidade || '',
+        cep: d.cep || ''
+      });
+    } else {
+      setQuickAddData({
+        nomeDaFamilia: '',
+        dataNascimento: '',
+        sexo: 'M',
+        categoria: 'adulto',
+        batizado: false,
+        dataBatismo: '',
+        comunidadeId: usuarioAtivo?.comunidadesPermitidas[0] || '1',
+        endereco: '',
+        numero: '',
+        bairro: '',
+        cidade: '',
+        cep: ''
+      });
+    }
+
     setShowQuickAdd(false);
     setModalOpen(true);
   };
@@ -159,27 +206,28 @@ export const UsuariosPage: React.FC = () => {
       }
       
       try {
-        // 1. Criar Família (com dados mínimos)
+        // 1. Criar Família (com dados completos)
         const novaFamilia = await familiaService.create({
           nomeFamilia: quickAddData.nomeDaFamilia,
-          endereco: 'Não informado',
-          numero: 'S/N',
-          bairro: 'Não informado',
-          cidade: 'Não informado',
-          cep: '00000000',
-          comunidadeId: usuarioAtivo?.comunidadesPermitidas[0] || '1', // fallback
+          endereco: quickAddData.endereco || 'Não informado',
+          numero: quickAddData.numero || 'S/N',
+          bairro: quickAddData.bairro || 'Não informado',
+          cidade: quickAddData.cidade || 'Não informado',
+          cep: quickAddData.cep || '00000000',
+          comunidadeId: quickAddData.comunidadeId,
           ativo: true
         });
 
         // 2. Criar Pessoa
         const novaPessoa = await pessoaService.create({
-          nomeCompleto: itemSelecionado.usuario.nome, // Pega o nome do usuário
+          nomeCompleto: itemSelecionado.usuario.nome,
           dataNascimento: quickAddData.dataNascimento,
           sexo: quickAddData.sexo as any,
           categoria: quickAddData.categoria as any,
           familiaId: novaFamilia.id,
           comunidadeId: novaFamilia.comunidadeId,
-          batizado: false,
+          batizado: quickAddData.batizado,
+          dataBatismo: quickAddData.batizado ? quickAddData.dataBatismo : undefined,
           ativo: true
         });
 
@@ -468,17 +516,26 @@ export const UsuariosPage: React.FC = () => {
                 </div>
                 
                 {showQuickAdd ? (
-                  <div className="bg-purple-50/50 p-4 rounded-xl border border-purple-100 space-y-3 animate-in fade-in slide-in-from-top-2">
-                    <div>
-                      <label className="text-[10px] font-bold text-gray-600 block mb-1">Nome da Nova Família *</label>
-                      <input
-                        type="text"
-                        name="nomeDaFamilia"
-                        placeholder="Ex: Família Silva"
-                        value={quickAddData.nomeDaFamilia}
-                        onChange={handleQuickAddChange}
-                        className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8b5cf6]"
-                      />
+                  <div className="bg-purple-50/50 p-4 rounded-xl border border-purple-100 space-y-3 animate-in fade-in slide-in-from-top-2 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                    {itemSelecionado.usuario?.dadosCadastro && (
+                      <div className="bg-green-50 border border-green-200 text-green-700 p-2 rounded-lg text-xs flex items-center mb-2">
+                        <CheckCircle size={14} className="mr-2 shrink-0" />
+                        Campos preenchidos automaticamente com os dados que o usuário enviou no cadastro. Revisão necessária antes de aprovar.
+                      </div>
+                    )}
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="col-span-2">
+                        <label className="text-[10px] font-bold text-gray-600 block mb-1">Nome da Nova Família *</label>
+                        <input
+                          type="text"
+                          name="nomeDaFamilia"
+                          placeholder="Ex: Família Silva"
+                          value={quickAddData.nomeDaFamilia}
+                          onChange={handleQuickAddChange}
+                          className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8b5cf6]"
+                        />
+                      </div>
                     </div>
                     
                     <div className="grid grid-cols-2 gap-3">
@@ -506,24 +563,63 @@ export const UsuariosPage: React.FC = () => {
                       </div>
                     </div>
                     
-                    <div>
-                      <label className="text-[10px] font-bold text-gray-600 block mb-1">Categoria *</label>
-                      <select
-                        name="categoria"
-                        value={quickAddData.categoria}
-                        onChange={handleQuickAddChange}
-                        className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8b5cf6]"
-                      >
-                        <option value="adulto">Adulto</option>
-                        <option value="jovem">Jovem (Geral)</option>
-                        <option value="moco">Moço</option>
-                        <option value="moca">Moça</option>
-                        <option value="menino">Menino</option>
-                        <option value="menina">Menina</option>
-                      </select>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-[10px] font-bold text-gray-600 block mb-1">Categoria *</label>
+                        <select
+                          name="categoria"
+                          value={quickAddData.categoria}
+                          onChange={handleQuickAddChange}
+                          className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8b5cf6]"
+                        >
+                          <option value="adulto">Adulto</option>
+                          <option value="jovem">Jovem (Geral)</option>
+                          <option value="moco">Moço</option>
+                          <option value="moca">Moça</option>
+                          <option value="menino">Menino</option>
+                          <option value="menina">Menina</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold text-gray-600 block mb-1">Comunidade *</label>
+                        <select
+                          name="comunidadeId"
+                          value={quickAddData.comunidadeId}
+                          onChange={handleQuickAddChange}
+                          className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8b5cf6]"
+                        >
+                          <option value="1">Jardim Bom Clima</option>
+                          <option value="2">Jardim Planalto</option>
+                        </select>
+                      </div>
                     </div>
-                    <p className="text-[9px] text-gray-400 leading-tight">
-                      Este formulário criará uma família e um morador básicos. O nome do morador será o mesmo da conta ({itemSelecionado.usuario.nome}). Você poderá editar os demais dados na aba Famílias depois.
+
+                    {/* Endereço */}
+                    <div className="pt-2 border-t border-purple-100 space-y-3">
+                      <div className="grid grid-cols-4 gap-2">
+                        <div className="col-span-3">
+                          <label className="text-[10px] font-bold text-gray-600 block mb-1">Rua/Avenida *</label>
+                          <input type="text" name="endereco" value={quickAddData.endereco} onChange={handleQuickAddChange} className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8b5cf6]" />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold text-gray-600 block mb-1">Nº *</label>
+                          <input type="text" name="numero" value={quickAddData.numero} onChange={handleQuickAddChange} className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8b5cf6]" />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="text-[10px] font-bold text-gray-600 block mb-1">Bairro *</label>
+                          <input type="text" name="bairro" value={quickAddData.bairro} onChange={handleQuickAddChange} className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8b5cf6]" />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold text-gray-600 block mb-1">Cidade *</label>
+                          <input type="text" name="cidade" value={quickAddData.cidade} onChange={handleQuickAddChange} className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8b5cf6]" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <p className="text-[9px] text-gray-400 leading-tight pt-2">
+                      Este formulário criará uma família e um morador baseados nos dados fornecidos na inscrição. O nome do morador será o mesmo da conta ({itemSelecionado.usuario.nome}).
                     </p>
                   </div>
                 ) : (
