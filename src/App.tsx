@@ -9,6 +9,7 @@ import { JovensPage } from './pages/Placeholders';
 import { IrmandadePage } from './pages/IrmandadePage';
 import { AuxiliaresPage } from './pages/AuxiliaresPage';
 import { AdminAprovacaoPage } from './pages/AdminAprovacaoPage';
+import { MinhaFamiliaPage } from './pages/MinhaFamiliaPage';
 import { Clock } from 'lucide-react';
 
 const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode, allowedRoles?: string[] }) => {
@@ -49,6 +50,9 @@ const AppRoutes = () => {
         {/* Apenas Cooperador */}
         <Route path="admin" element={<ProtectedRoute allowedRoles={['cooperador']}><AdminAprovacaoPage /></ProtectedRoute>} />
         
+        {/* Acesso para Pais e Jovens */}
+        <Route path="minha-familia" element={<ProtectedRoute allowedRoles={['pai', 'jovem', 'cooperador', 'auxiliar']}><MinhaFamiliaPage /></ProtectedRoute>} />
+
         <Route path="jovens" element={<JovensPage />} />
         <Route path="mais" element={<div className="p-4"><h1 className="text-xl font-bold text-primary">Mais</h1><p className="text-gray-500">Opções extras (famílias, jovens etc.)</p></div>} />
       </Route>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, Users, BookOpen, ShieldCheck } from 'lucide-react';
+import { Home, Users, BookOpen, ShieldCheck, Heart } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 
 export const MobileNavigation: React.FC = () => {
@@ -8,6 +8,7 @@ export const MobileNavigation: React.FC = () => {
 
   const navItems = [
     { to: '/', label: 'Início', icon: Home, color: 'text-[#8b5cf6]', activeBg: 'bg-[#f5f3ff]', roles: ['cooperador', 'auxiliar', 'pai', 'jovem'] },
+    { to: '/minha-familia', label: 'Família', icon: Heart, color: 'text-pink-500', activeBg: 'bg-pink-50', roles: ['pai', 'jovem', 'cooperador', 'auxiliar'] },
     { to: '/irmandade', label: 'Irmandade', icon: Users, color: 'text-[#10b981]', activeBg: 'bg-emerald-50', roles: ['cooperador', 'auxiliar'] },
     { to: '/auxiliares', label: 'Auxiliares', icon: BookOpen, color: 'text-[#ec4899]', activeBg: 'bg-[#fff0f6]', roles: ['cooperador', 'auxiliar'] },
     { to: '/admin', label: 'Aprovações', icon: ShieldCheck, color: 'text-amber-500', activeBg: 'bg-amber-50', roles: ['cooperador'] },
