@@ -28,8 +28,9 @@ export const AdminAprovacaoPage: React.FC = () => {
   };
 
   const handleAprovar = async (usuario: Usuario) => {
-    const perfil = selectedPerfil[usuario.id] || 'jovem';
-    const pessoaId = selectedPessoa[usuario.id] || null;
+    const perfil = selectedPerfil[usuario.id] || usuario.perfil || 'jovem';
+    const pessoaIdStr = selectedPessoa[usuario.id];
+    const pessoaId = pessoaIdStr === undefined ? usuario.pessoaId : (pessoaIdStr === '' ? null : pessoaIdStr);
 
     if (perfil !== 'cooperador' && !pessoaId) {
       if (!confirm('Tem certeza que deseja aprovar sem vincular a um membro da família? (Geralmente apenas o Cooperador fica sem vínculo)')) {
