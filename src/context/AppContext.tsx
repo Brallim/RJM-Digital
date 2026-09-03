@@ -74,7 +74,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           id: authUser.id,
           nome: authUser.email?.split('@')[0] || 'Usuário',
           email: authUser.email,
-          perfil: 'pendente',
+          perfil: null,
+          status: 'pendente',
           comunidadesPermitidas: [],
           ativo: false
         } as Usuario);

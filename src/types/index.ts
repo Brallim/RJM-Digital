@@ -1,4 +1,5 @@
-export type Perfil = 'cooperador' | 'auxiliar' | 'pai' | 'jovem' | 'pendente';
+export type Perfil = 'cooperador' | 'auxiliar' | 'pai' | 'jovem';
+export type StatusUsuario = 'pendente' | 'ativo' | 'bloqueado' | 'rejeitado';
 export type Categoria = 'menina' | 'moca' | 'menino' | 'moco' | 'adulto';
 export type StatusReuniao = 'planejamento' | 'preparada' | 'em_andamento' | 'finalizada';
 export type StatusParticipante = 'programado' | 'confirmado' | 'ausente' | 'incluido_no_dia' | 'substituido' | 'recitou';
@@ -8,9 +9,10 @@ export interface Usuario {
   pessoaId?: string | null; // Liga o usuário a uma Pessoa na congregação
   nome: string;
   email: string;
-  perfil: Perfil;
+  perfil?: Perfil | null;
+  status: StatusUsuario;
   comunidadesPermitidas: string[];
-  ativo: boolean;
+  ativo?: boolean; // Mantido por compatibilidade por enquanto
 }
 
 export interface Comunidade {

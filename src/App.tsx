@@ -8,7 +8,7 @@ import { FamiliasPage } from './pages/FamiliasPage';
 import { JovensPage } from './pages/Placeholders';
 import { IrmandadePage } from './pages/IrmandadePage';
 import { AuxiliaresPage } from './pages/AuxiliaresPage';
-import { AdminAprovacaoPage } from './pages/AdminAprovacaoPage';
+import { UsuariosPage } from './pages/UsuariosPage';
 import { MinhaFamiliaPage } from './pages/MinhaFamiliaPage';
 import { Clock } from 'lucide-react';
 
@@ -17,7 +17,7 @@ const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode,
   
   if (!usuarioAtivo) return <Navigate to="/login" />;
   
-  if (usuarioAtivo.perfil === 'pendente') {
+  if (usuarioAtivo.status === 'pendente' || usuarioAtivo.status === 'bloqueado' || usuarioAtivo.status === 'rejeitado') {
     return (
       <div className="min-h-screen bg-[#fafafa] flex flex-col items-center justify-center p-6 text-center animate-in fade-in">
         <Clock size={48} className="text-amber-400 mb-4" />
@@ -27,7 +27,7 @@ const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode,
     );
   }
 
-  if (allowedRoles && !allowedRoles.includes(usuarioAtivo.perfil)) {
+  if (allowedRoles && (!usuarioAtivo.perfil || !allowedRoles.includes(usuarioAtivo.perfil))) {
     return <Navigate to="/" />; // Redirect to dashboard if not allowed
   }
   
@@ -48,7 +48,7 @@ const AppRoutes = () => {
         <Route path="auxiliares" element={<ProtectedRoute allowedRoles={['cooperador', 'auxiliar']}><AuxiliaresPage /></ProtectedRoute>} />
         
         {/* Apenas Cooperador */}
-        <Route path="admin" element={<ProtectedRoute allowedRoles={['cooperador']}><AdminAprovacaoPage /></ProtectedRoute>} />
+        <Route path="admin" element={<ProtectedRoute allowedRoles={['cooperador']}><UsuariosPage /></ProtectedRoute>} />
         
         {/* Acesso para Pais e Jovens */}
         <Route path="minha-familia" element={<ProtectedRoute allowedRoles={['pai', 'jovem', 'cooperador', 'auxiliar']}><MinhaFamiliaPage /></ProtectedRoute>} />

@@ -6,9 +6,9 @@ export const mockComunidades: Comunidade[] = [
 ];
 
 export const mockUsuarios: Usuario[] = [
-  { id: 'u1', nome: 'Irmão Cooperador', email: 'cooperador@rjmdigital.com', perfil: 'cooperador', comunidadesPermitidas: ['1', '2'], ativo: true },
-  { id: 'u2', nome: 'Irmã Auxiliar', email: 'auxiliar@rjmdigital.com', perfil: 'auxiliar', comunidadesPermitidas: ['1'], ativo: true },
-  { id: 'u3', nome: 'Família Silva', email: 'familia@rjmdigital.com', perfil: 'pai', comunidadesPermitidas: ['1'], ativo: true }
+  { id: 'u1', nome: 'Irmão Cooperador', email: 'cooperador@rjmdigital.com', perfil: 'cooperador', status: 'ativo', comunidadesPermitidas: ['1', '2'], ativo: true },
+  { id: 'u2', nome: 'Irmã Auxiliar', email: 'auxiliar@rjmdigital.com', perfil: 'auxiliar', status: 'ativo', comunidadesPermitidas: ['1'], ativo: true },
+  { id: 'u3', nome: 'Família Silva', email: 'familia@rjmdigital.com', perfil: 'pai', status: 'ativo', comunidadesPermitidas: ['1'], ativo: true }
 ];
 
 export const mockFamilias: Familia[] = [

@@ -126,7 +126,7 @@ export const DashboardPage: React.FC = () => {
             {usuarioAtivo?.nome || 'Irmão(ã)'}
           </h1>
           <span className="text-[10px] font-bold text-[#8b5cf6] uppercase tracking-wider bg-purple-50 px-2 py-0.5 rounded-full mt-0.5">
-            {getRoleLabel(usuarioAtivo?.perfil)}
+            {usuarioAtivo?.perfil ? getRoleLabel(usuarioAtivo.perfil) : 'Pendente'}
           </span>
         </div>
         <div className="relative">
